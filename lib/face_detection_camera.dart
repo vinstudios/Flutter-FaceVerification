@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:path/path.dart' as PATH;
 import 'package:path_provider/path_provider.dart';
-import 'face_painter.dart';
+//import 'face_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
@@ -16,20 +16,20 @@ class FaceDetectionFromLiveCamera extends StatefulWidget {
 class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamera> {
   List<Face> faces;
   CameraController _controller;
-  BuildContext ctx;
-
   final int fac = pow(10, 2);
 
   bool foundFace = false;
-  bool closeBothEyes = false;
-  String text = 'Detecting face...';
+  bool validFace = false;
+  String text = 'Searching face...';
 
   double leftEyeOpenProbability = 0;
   double rightEyeOpenProbability = 0;
-  double closeEyeValue = 0.1;
+  double closeEyeValue = 0.05;
 
   bool _isDetecting = false;
   CameraLensDirection _direction = CameraLensDirection.front;
+
+  Size screenSize;
 
   @override
   void initState() {
@@ -59,17 +59,11 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       if (_isDetecting) return;
       _isDetecting = true;
 
-      detect(
-              image,
-              FirebaseVision.instance
-                  .faceDetector(FaceDetectorOptions(enableClassification: true))
-                  .processImage,
-              rotation)
-          .then(
-        (dynamic result) {
+      detect(image, FirebaseVision.instance.faceDetector(FaceDetectorOptions(enableClassification: true)).processImage, rotation).then((dynamic result) {
           setState(() => faces = result);
           _isDetecting = false;
         },
+
       ).catchError(
         (_) {
           _isDetecting = false;
@@ -79,11 +73,10 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   }
 
   void captureImage() async {
-
     try {
       final path = PATH.join((await getTemporaryDirectory()).path,'${DateTime.now()}.png');
       await _controller.initialize();
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: 50));
       await _controller.takePicture(path);
       Navigator.pop(context, path);
     } catch (e) {
@@ -91,152 +84,195 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     }
   }
 
-  Widget _buildResults() {
-    const Text noResultsText = const Text('No results!');
-    if (faces == null || _controller == null || !_controller.value.isInitialized) {
-      return noResultsText;
-    }
-
-    CustomPainter painter;
-    final Size imageSize = Size(_controller.value.previewSize.height,
-        _controller.value.previewSize.width);
-
-    if (faces is! List<Face>) return noResultsText;
-    painter = FacePainterLiveCamera(imageSize, faces);
-
-    if (faces.length > 0) {
-      foundFace = true;
-      text = faces.length > 1 ? 'Found faces' : 'Found face';
-      for (Face face in faces) {
-        if (face.leftEyeOpenProbability != null) {
-          leftEyeOpenProbability =
-              (face.leftEyeOpenProbability * fac).round() / fac;
-        } else {
-          leftEyeOpenProbability = 0;
-        }
-
-        if (face.rightEyeOpenProbability != null) {
-          rightEyeOpenProbability =
-              (face.rightEyeOpenProbability * fac).round() / fac;
-        } else {
-          rightEyeOpenProbability = 0;
-        }
-
-        if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
-          //closeBothEyes = true;
-          captureImage();
-        }
-      }
-    } else {
-      foundFace = false;
-      //closeBothEyes = false;
-      text = 'Detecting face...';
-    }
-
-    return CustomPaint(
-      painter: painter,
-    );
-  }
-
-//  void _toggleCameraDirection() async {
-//    if (_direction == CameraLensDirection.back) {
-//      _direction = CameraLensDirection.front;
-//    } else {
-//      _direction = CameraLensDirection.back;
+//  Widget _buildResults() {
+//    const Text noResultsText = const Text('No results!');
+//    if (faces == null || _controller == null || !_controller.value.isInitialized) {
+//      return noResultsText;
 //    }
 //
-//    await _controller.stopImageStream();
-//    await _controller.dispose();
+//    CustomPainter painter;
 //
-//    setState(() {
-//      _controller = null;
-//    });
+//    final Size imageSize = Size(_controller.value.previewSize.height, _controller.value.previewSize.width);
 //
-//    _initializeCamera();
+//    if (faces is! List<Face>) return noResultsText;
+//
+//    painter = FacePainterLiveCamera(imageSize, faces);
+//
+//    if (faces.length > 0) {
+//      for (Face face in faces) {
+//        if (face.boundingBox.width < (screenSize.width - (screenSize.width / 5))) {
+//          text = 'Please align your face';
+//        }
+//        else {
+//          foundFace = true;
+//          if (face.leftEyeOpenProbability != null) {
+//            leftEyeOpenProbability =
+//                (face.leftEyeOpenProbability * fac).round() / fac;
+//          } else {
+//            leftEyeOpenProbability = 0;
+//          }
+//
+//          if (face.rightEyeOpenProbability != null) {
+//            rightEyeOpenProbability =
+//                (face.rightEyeOpenProbability * fac).round() / fac;
+//          } else {
+//            rightEyeOpenProbability = 0;
+//          }
+//
+//          if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
+//            captureImage();
+//          }
+//        }
+//
+//      }
+//    }
+//    else {
+//      foundFace = false;
+//      text = 'Searching face...';
+//    }
+//
+//    return CustomPaint(
+//      painter: painter,
+//    );
 //  }
+
+  void faceVerification() {
+    if (faces != null) {
+      if (faces.length > 0) {
+        for (Face face in faces) {
+          if (face.boundingBox.width < (screenSize.width - (screenSize.width / 5))) {
+            text = 'Please align your face';
+          }
+          else {
+            foundFace = true;
+            if (face.leftEyeOpenProbability != null) {
+              leftEyeOpenProbability =
+                  (face.leftEyeOpenProbability * fac).round() / fac;
+            } else {
+              leftEyeOpenProbability = 0;
+            }
+
+            if (face.rightEyeOpenProbability != null) {
+              rightEyeOpenProbability =
+                  (face.rightEyeOpenProbability * fac).round() / fac;
+            } else {
+              rightEyeOpenProbability = 0;
+            }
+
+            if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
+              captureImage();
+            }
+          }
+        }
+      }
+      else {
+        foundFace = false;
+        text = 'Searching face...';
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    ctx = context;
+    screenSize = MediaQuery.of(context).size;
+    faceVerification();
     return Scaffold(
       backgroundColor: Colors.blue,
-      body: SafeArea(
-        child: Container(
-          constraints: const BoxConstraints.expand(),
-          child: _controller == null
-              ? const Center(
-                  child: Text(
-                    'Initializing Camera...',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 20.0,
+      body: Container(
+        //constraints: const BoxConstraints.expand(),
+        child: _controller == null
+            ? const Center(
+                child: Text(
+                  'Initializing Camera...',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 20.0,
+                  ),
+                ),
+              )
+            : Stack(
+                alignment: Alignment.center,
+                fit: StackFit.expand,
+                children: <Widget>[
+                  CameraPreview(_controller),
+                  //_buildResults(),
+                  ColorFiltered(
+                    colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.srcOut), // This one will create the magic
+                    child: Stack(
+                      fit: StackFit.expand,
+                      alignment: Alignment.center,
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.black,
+                              backgroundBlendMode: BlendMode.dstOut), // This one will handle background + difference out
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: 50.0),
+                            height: screenSize.height - 150,
+                            width: screenSize.width - (screenSize.width / 5),
+                            decoration: BoxDecoration(color: Colors.red,
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                )
-              : Stack(
-                  alignment: Alignment.center,
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    CameraPreview(_controller),
-                    _buildResults(),
-                    Positioned(
-                      bottom: 200.0,
-                      child: Opacity(
-                          opacity: 0.75,
-                          child: Text(text,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30.0,
-                                  letterSpacing: 2.0))),
-                    ),
-                    !foundFace
-                        ? Container()
-                        : Stack(
-                            alignment: Alignment.center,
-                            children: <Widget>[
-                              Positioned(
-                                bottom: 175.0,
-                                child: Opacity(
-                                    opacity: 0.75,
-                                    child: Text(
-                                        'Close both eyes to take picture',
-                                        style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 20.0,
-                                            letterSpacing: 1.0))),
-                              ),
-                              Positioned(
-                                bottom: 155.0,
-                                child: Opacity(
-                                    opacity: 0.75,
-                                    child: Text(
-                                        'Left eye lid: ${leftEyeOpenProbability * 100}%',
-                                        style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 14.0,
-                                            letterSpacing: 1.0))),
-                              ),
-                              Positioned(
-                                bottom: 135.0,
-                                child: Opacity(
-                                    opacity: 0.75,
-                                    child: Text(
+                  !foundFace
+                      ? Positioned(
+                    top: screenSize.height - (screenSize.width / 5),
+                    child: Text(text,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22.0,
+                            letterSpacing: 2.0)),
+                  )
+                      : Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
+                            Positioned(
+                              top: screenSize.height - (screenSize.width / 5),
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                      'Close both eyes to take picture',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20.0,
+                                          letterSpacing: 1.0)),
+                                  Row(
+                                    children: <Widget>[
+                                      Text(
+                                          'Left eye lid: ${leftEyeOpenProbability * 100}%',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14.0,
+                                              letterSpacing: 1.0)),
+                                      SizedBox(width: 10.0),
+                                      Text(' | ', style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14.0,
+                                          letterSpacing: 1.0)),
+                                      SizedBox(width: 10.0),
+                                      Text(
                                         'Right eye lid: ${rightEyeOpenProbability * 100}%',
                                         style: TextStyle(
-                                            color: Colors.red,
+                                            color: Colors.white,
                                             fontSize: 14.0,
-                                            letterSpacing: 1.0))),
+                                            letterSpacing: 1.0),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                  ],
-                ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: captureImage, //_toggleCameraDirection,
-        child: Icon(Icons.cloud_upload),
+                            ),
+                          ],
+                        ),
+                ],
+              ),
       ),
     );
   }

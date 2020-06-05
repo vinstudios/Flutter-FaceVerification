@@ -13,14 +13,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String image;
-  String text = 'Please verify if you are handsome';
+  String text = 'Face verification';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 5.0,
+        elevation: 0.0,
+        leading: Image.asset(
+          'images/jex.png',
+          scale: 35.0,
+        ),
+        title: Text('JEXMOVERS', style: TextStyle(
+          fontSize: 20.0,
+          letterSpacing: 2.0,
+        )),
+        backgroundColor: Color(0xFF1a237e),
+      ),
       body: SafeArea(
         child: Center(
           child: image == null
-              ? Text(text)
+              ? Column(
+                children: <Widget>[
+                  SizedBox(height: 20.0),
+                  Image.asset('images/face_detect.gif'),
+                  SizedBox(height: 30.0),
+                  Text(text, style: TextStyle(color: Color(0xFF1a237e), fontSize: 16.0, letterSpacing: 1.5)),
+                ],
+              )
               : Stack(alignment: Alignment.center,
                 children: <Widget>[
                   Positioned(child: Image.file(File(image))),
@@ -31,13 +52,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.camera),
+        child: Icon(Icons.camera, color: Colors.white, size: 55.0),
         onPressed: () async {
           var result = await Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => FaceDetectionFromLiveCamera()));
           setState(() {
             if (result == null) {
-              text = 'Face verification cancelled. Please try again';
+              text = 'Face verification cancelled';
             } else {
               image = result;
             }

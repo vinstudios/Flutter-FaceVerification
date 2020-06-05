@@ -1,6 +1,6 @@
+import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
@@ -8,11 +8,7 @@ import 'package:flutter/foundation.dart';
 typedef HandleDetection = Future<List<Face>> Function(FirebaseVisionImage image);
 
 Future<CameraDescription> getCamera(CameraLensDirection dir) async {
-  return await availableCameras().then(
-        (List<CameraDescription> cameras) => cameras.firstWhere(
-          (CameraDescription camera) => camera.lensDirection == dir,
-    ),
-  );
+  return await availableCameras().then((List<CameraDescription> cameras) => cameras.firstWhere((CameraDescription camera) => camera.lensDirection == dir));
 }
 
 Uint8List concatenatePlanes(List<Plane> planes) {
@@ -38,7 +34,7 @@ FirebaseVisionImageMetadata buildMetaData(CameraImage image, ImageRotation rotat
 }
 
 Future<List<Face>> detect(CameraImage image, HandleDetection handleDetection, ImageRotation rotation,) async {
-  return handleDetection(FirebaseVisionImage.fromBytes(concatenatePlanes(image.planes),buildMetaData(image, rotation),
+  return handleDetection(FirebaseVisionImage.fromBytes(concatenatePlanes(image.planes), buildMetaData(image, rotation),
     ),
   );
 }
