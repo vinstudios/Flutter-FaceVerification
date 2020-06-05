@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'face_detection_camera.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'utils.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -28,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
          setState((){
            if (result == null) {
              text = 'Face verification cancelled. Please try again';
+           }
+           else {
+             image = result;
            }
          });
         },
