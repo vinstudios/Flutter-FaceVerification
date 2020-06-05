@@ -36,10 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: image == null
               ? Column(
                 children: <Widget>[
-                  SizedBox(height: 20.0),
                   Image.asset('images/face_detect.gif'),
                   SizedBox(height: 30.0),
-                  Text(text, style: TextStyle(color: Color(0xFF1a237e), fontSize: 16.0, letterSpacing: 1.5)),
+                  Text(text, style: TextStyle(color: Color(0xFF1a237e), fontSize: 20.0, letterSpacing: 1.5)),
                 ],
               )
               : Stack(alignment: Alignment.center,
@@ -52,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.camera, color: Colors.white, size: 55.0),
+        backgroundColor: Color(0xFF1a237e),
+        child: Icon(Icons.camera, color: Colors.white, size: 45.0),
         onPressed: () async {
           var result = await Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => FaceDetectionFromLiveCamera()));

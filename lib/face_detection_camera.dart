@@ -177,7 +177,19 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     screenSize = MediaQuery.of(context).size;
     faceVerification();
     return Scaffold(
-      backgroundColor: Colors.blue,
+      appBar: AppBar(
+        titleSpacing: 5.0,
+        elevation: 0.0,
+        leading: Image.asset(
+          'images/jex.png',
+          scale: 35.0,
+        ),
+        title: Text('JEXMOVERS', style: TextStyle(
+          fontSize: 20.0,
+          letterSpacing: 2.0,
+        )),
+        backgroundColor: Color(0xFF1a237e),
+      ),
       body: Container(
         //constraints: const BoxConstraints.expand(),
         child: _controller == null
@@ -210,11 +222,11 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                         Align(
                           alignment: Alignment.center,
                           child: Container(
-                            margin: EdgeInsets.only(bottom: 50.0),
-                            height: screenSize.height - 150,
+                            margin: EdgeInsets.only(bottom: 20.0),
+                            height: screenSize.height - (screenSize.height / 4),
                             width: screenSize.width - (screenSize.width / 5),
                             decoration: BoxDecoration(color: Colors.red,
-                              borderRadius: BorderRadius.circular(50),
+                              borderRadius: BorderRadius.circular(25),
                             ),
                           ),
                         ),
