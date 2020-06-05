@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "937163355794",
+    "firebase_url": "https://faceverification-2a54f.firebaseio.com",
+    "project_id": "faceverification-2a54f",
+    "storage_bucket": "faceverification-2a54f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937163355794:android:bb21d9fccf2ad984c1984b",
+        "android_client_info": {
+          "package_name": "com.jexmovers.faceverification"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "937163355794-v1697bnsisge6hr5uh6uvoa5tk3da7go.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAReTfHYsp6lvCeRE8HYvfozcNzOS07mF0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "937163355794-v1697bnsisge6hr5uh6uvoa5tk3da7go.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
