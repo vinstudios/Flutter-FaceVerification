@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as PATH;
 import 'package:path_provider/path_provider.dart';
 import 'face_painter.dart';
 import 'package:flutter/material.dart';
@@ -10,18 +10,15 @@ import 'utils.dart';
 
 class FaceDetectionFromLiveCamera extends StatefulWidget {
   @override
-  _FaceDetectionFromLiveCameraState createState() =>
-      _FaceDetectionFromLiveCameraState();
+  _FaceDetectionFromLiveCameraState createState() => _FaceDetectionFromLiveCameraState();
 }
 
-class _FaceDetectionFromLiveCameraState
-    extends State<FaceDetectionFromLiveCamera> {
+class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamera> {
   List<Face> faces;
   CameraController _controller;
   BuildContext ctx;
 
-  static int decimals = 2;
-  static int fac = pow(10, decimals);
+  final int fac = pow(10, 2);
 
   bool foundFace = false;
   bool closeBothEyes = false;
@@ -29,6 +26,7 @@ class _FaceDetectionFromLiveCameraState
 
   double leftEyeOpenProbability = 0;
   double rightEyeOpenProbability = 0;
+  double closeEyeValue = 0.1;
 
   bool _isDetecting = false;
   CameraLensDirection _direction = CameraLensDirection.front;
@@ -47,11 +45,9 @@ class _FaceDetectionFromLiveCameraState
 
   void _initializeCamera() async {
     CameraDescription description = await getCamera(_direction);
-    ImageRotation rotation =
-        rotationIntToImageRotation(description.sensorOrientation);
+    ImageRotation rotation = rotationIntToImageRotation(description.sensorOrientation);
 
-    _controller = CameraController(
-      description,
+    _controller = CameraController(description,
       defaultTargetPlatform == TargetPlatform.iOS
           ? ResolutionPreset.low
           : ResolutionPreset.medium,
@@ -83,14 +79,13 @@ class _FaceDetectionFromLiveCameraState
   }
 
   void captureImage() async {
+
     try {
+      final path = PATH.join((await getTemporaryDirectory()).path,'${DateTime.now()}.png');
       await _controller.initialize();
-      final path = join(
-        (await getTemporaryDirectory()).path,
-        '${DateTime.now()}.png',
-      );
+      await Future.delayed(Duration(milliseconds: 500));
       await _controller.takePicture(path);
-      Navigator.pop(ctx, path);
+      Navigator.pop(context, path);
     } catch (e) {
       print(e);
     }
@@ -127,14 +122,14 @@ class _FaceDetectionFromLiveCameraState
           rightEyeOpenProbability = 0;
         }
 
-        if (leftEyeOpenProbability <= 0.2 && rightEyeOpenProbability <= 0.2) {
+        if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
           //closeBothEyes = true;
           captureImage();
         }
       }
     } else {
       foundFace = false;
-      closeBothEyes = false;
+      //closeBothEyes = false;
       text = 'Detecting face...';
     }
 
@@ -143,22 +138,22 @@ class _FaceDetectionFromLiveCameraState
     );
   }
 
-  void _toggleCameraDirection() async {
-    if (_direction == CameraLensDirection.back) {
-      _direction = CameraLensDirection.front;
-    } else {
-      _direction = CameraLensDirection.back;
-    }
-
-    await _controller.stopImageStream();
-    await _controller.dispose();
-
-    setState(() {
-      _controller = null;
-    });
-
-    _initializeCamera();
-  }
+//  void _toggleCameraDirection() async {
+//    if (_direction == CameraLensDirection.back) {
+//      _direction = CameraLensDirection.front;
+//    } else {
+//      _direction = CameraLensDirection.back;
+//    }
+//
+//    await _controller.stopImageStream();
+//    await _controller.dispose();
+//
+//    setState(() {
+//      _controller = null;
+//    });
+//
+//    _initializeCamera();
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +210,7 @@ class _FaceDetectionFromLiveCameraState
                                 child: Opacity(
                                     opacity: 0.75,
                                     child: Text(
-                                        'Left eye Prob: $leftEyeOpenProbability',
+                                        'Left eye lid: ${leftEyeOpenProbability * 100}%',
                                         style: TextStyle(
                                             color: Colors.red,
                                             fontSize: 14.0,
@@ -226,7 +221,7 @@ class _FaceDetectionFromLiveCameraState
                                 child: Opacity(
                                     opacity: 0.75,
                                     child: Text(
-                                        'Right eye Prob: $rightEyeOpenProbability',
+                                        'Right eye lid: ${rightEyeOpenProbability * 100}%',
                                         style: TextStyle(
                                             color: Colors.red,
                                             fontSize: 14.0,
@@ -240,23 +235,8 @@ class _FaceDetectionFromLiveCameraState
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            await _controller.initialize();
-            final path = join(
-              (await getTemporaryDirectory()).path,
-              '${DateTime.now()}.png',
-            );
-
-            await _controller.takePicture(path);
-            Navigator.pop(context, path);
-          } catch (e) {
-            print(e);
-          }
-        }, //_toggleCameraDirection,
-        child: _direction == CameraLensDirection.back
-            ? const Icon(Icons.camera_front)
-            : const Icon(Icons.camera_rear),
+        onPressed: captureImage, //_toggleCameraDirection,
+        child: Icon(Icons.cloud_upload),
       ),
     );
   }
