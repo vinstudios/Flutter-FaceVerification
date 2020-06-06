@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
-
 import 'face_detection_camera.dart';
 import 'package:flutter/material.dart';
 
@@ -14,9 +13,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String image;
   String text = 'Please verify your face';
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  void showSnackBar(String value) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(value)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         titleSpacing: 5.0,
         elevation: 0.0,
@@ -78,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             if (result == null) {
               text = 'Face verification cancelled';
+              showSnackBar(text);
             } else {
               image = result;
             }

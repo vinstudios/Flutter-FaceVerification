@@ -1,12 +1,11 @@
 import 'dart:math';
 import 'package:path/path.dart' as PATH;
 import 'package:path_provider/path_provider.dart';
-//import 'face_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
-import 'utils.dart';
+import 'image_data.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class FaceDetectionFromLiveCamera extends StatefulWidget {
@@ -30,9 +29,14 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
 
   bool isCapturing = false;
   bool _isDetecting = false;
-  CameraLensDirection _direction = CameraLensDirection.back;
+  CameraLensDirection _direction = CameraLensDirection.front;
 
   Size screenSize;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  void showSnackBar(String value) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(value)));
+  }
 
   @override
   void initState() {
@@ -72,6 +76,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       ).catchError(
         (_) {
           _isDetecting = false;
+          showSnackBar(_.toString());
         },
       );
     });
@@ -86,7 +91,8 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       await _controller.takePicture(path);
       Navigator.pop(context, path);
     } catch (e) {
-      print(e);
+      showSnackBar(e.toString());
+      print('Photo capture error: ' + e.toString());
     }
   }
 
@@ -128,12 +134,12 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     screenSize = MediaQuery.of(context).size;
     faceVerification();
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         elevation: 0.0,
         title:Row(
@@ -191,7 +197,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                       ],
                     ),
                   ),
-                  foundFace
+                  !foundFace
                       ? Positioned(
                     top: screenSize.height - (screenSize.width / 2),
                     child: Text(text,
@@ -208,7 +214,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                               child: Column(
                                 children: <Widget>[
                                   Text(
-                                      'Close both eyes to take picture',
+                                      'Blink both eyes to take picture',
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 20.0,
