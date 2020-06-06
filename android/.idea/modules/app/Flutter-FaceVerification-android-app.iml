@@ -180,6 +180,7 @@
     <orderEntry type="module" module-name="io.flutter.plugins.firebasemlvision-firebase_ml_vision" />
     <orderEntry type="module" module-name="io.flutter.plugins.firebase_core_web-firebase_core_web" />
     <orderEntry type="module" module-name="camera" />
+    <orderEntry type="module" module-name="path_provider" />
     <orderEntry type="module" module-name="io.flutter.plugins.firebase.core-firebase_core" />
     <orderEntry type="module" module-name="io.flutter.plugins.firebase.storage-firebase_storage" />
   </component>

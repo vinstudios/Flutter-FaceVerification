@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 void showSnackBar(String value) {
-  _scaffoldKey.currentState.showSnackBar(SnackBar(duration: Duration(milliseconds : 3000),behavior: SnackBarBehavior.floating, content: Text(value)));
+  _scaffoldKey.currentState.showSnackBar(SnackBar(
+      duration: Duration(milliseconds: 3000),
+      //behavior: SnackBarBehavior.floating,
+      content: Text(value)));
 }
 
 class HomeScreen extends StatefulWidget {
@@ -19,84 +22,117 @@ class _HomeScreenState extends State<HomeScreen> {
   String image;
   String text = 'Please verify your face';
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        titleSpacing: 5.0,
-        elevation: 0.0,
-        leading: Image.asset(
-          'images/jex.png',
-          scale: 35.0,
-        ),
-        title: Row(
-          children: <Widget>[
-            Text('JEX', style: TextStyle(
-              fontSize: 20.0,
-              letterSpacing: 2.0,
-              fontFamily: 'LemonMilkBold'
-            )),
-            Text('MOVERS', style: TextStyle(
-                fontSize: 20.0,
-                letterSpacing: 2.0,
-                fontFamily: 'LemonMilk'
-            )),
-          ],
-        ),
-        backgroundColor: Color(0xffff8888),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: image == null
-              ? Column(
-                children: <Widget>[
-                  Image.asset('images/face_detect.gif'),
-                  SizedBox(height: 30.0),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Color(0xff6576e7), fontSize: 20.0, letterSpacing: 1.5,),
-                        text: text,
-                      ),
-                    ),
-                  ),
-                  //Text(text, style: TextStyle(color: Color(0xFF1a237e), fontSize: 20.0, letterSpacing: 1.5)),
-                ],
-              )
-              : Stack(alignment: Alignment.center,
-                children: <Widget>[
-                  Positioned(child: Image.file(File(image))),
-                  Positioned(child: Uploader(path: image)),
-                ],
+      body: Column(
+        //mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Container(
+            width: double.infinity,
+            height: 90.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0)),
+              gradient: LinearGradient(
+                colors: [Color(0xff28045b), Color(0xff430e80)],
+                stops: [0.0, 0.0],
               ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        elevation: 5.0,
-        backgroundColor: Color(0xffff8888),
-        child: Icon(Icons.camera, color: Colors.white , size: 45.0),
-        onPressed: () async {
-          var result = await Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => FaceDetectionFromLiveCamera()));
-          setState(() {
-            if (result == null) {
-              text = 'Face verification cancelled';
-              showSnackBar(text);
-            } else {
-              image = result;
-            }
-          });
-        },
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: SizedBox(height: 50.0),
-        shape: CircularNotchedRectangle(),
-        color: Color(0xffff8888),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(top: 45.0),
+              child: Text(
+                'FACE VERIFICATION',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'LemonMilk',
+                    fontSize: 18.0,
+                    letterSpacing: 1.5),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(height: 40.0),
+                Text(
+                  'Get ready to take a photo of your self',
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 5.0),
+                Text(
+                  'To verify your identity, we need to collect your bio information',
+                  style: TextStyle(fontSize: 14.0, color: Colors.grey.shade500),
+                ),
+                SizedBox(height: 20.0),
+                Center(
+                  child: CircleAvatar(
+                    radius: 80.0,
+                    backgroundImage: AssetImage('images/face_detect.gif'),
+                  ),
+                ),
+                SizedBox(height: 80.0),
+                Padding(
+                  padding: EdgeInsets.only(left: 40.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('◼  Position your face within the frame',
+                          style: TextStyle(color: Colors.grey.shade700)),
+                      SizedBox(height: 10.0),
+                      Text('◼  Your face will be automatically scan',
+                          style: TextStyle(color: Colors.grey.shade700)),
+                      SizedBox(height: 10.0),
+                      Text('◼  Blink your both eyes to take a selfie',
+                          style: TextStyle(color: Colors.grey.shade700)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 40.0),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Text('Are you ready? Click "Next" to start verifying.',
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12.0)),
+              RaisedButton(
+                elevation: 1.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                color: Color(0xff430e80),
+                padding: EdgeInsets.symmetric(horizontal: 130.0),
+                child: Text(
+                  'NEXT',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'LemonMilk',
+                      letterSpacing: 3.0),
+                ),
+                onPressed: () async {
+                  image = null;
+                  var result = await Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => FaceDetectionFromLiveCamera()));
+                  setState(() {
+                    if (result == null) {
+                      text = 'Face verification cancelled';
+                      showSnackBar(text);
+                    } else {
+                      image = result;
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -121,8 +157,7 @@ class _UploaderState extends State<Uploader> {
             .ref()
             .child('Faces/${basename(widget.path)}')
             .putFile(File(widget.path));
-      }
-      catch (e) {
+      } catch (e) {
         showSnackBar(e.toString());
         print('Upload error: ' + e.toString());
       }
@@ -142,16 +177,23 @@ class _UploaderState extends State<Uploader> {
         stream: _uploadTask.events,
         builder: (context, snapshot) {
           var event = snapshot?.data?.snapshot;
-          double progressPercent = event != null ? event.bytesTransferred / event.totalByteCount : 0;
+          double progressPercent =
+              event != null ? event.bytesTransferred / event.totalByteCount : 0;
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                !_uploadTask.isComplete ? Text('Uploading...',style: TextStyle(color: Colors.red)) : Text('Upload complete',style: TextStyle(color: Colors.red)),
-                SizedBox(height: 10.0),
-                Container(width: 250.0, child: LinearProgressIndicator(value: progressPercent)),
-                SizedBox(height: 10.0),
-                Text('${(progressPercent * 100).toStringAsFixed(2)}%', style: TextStyle(color: Colors.red)),
-              ],
+            children: <Widget>[
+              !_uploadTask.isComplete
+                  ? Text('Uploading...', style: TextStyle(color: Colors.red))
+                  : Text('Upload complete',
+                      style: TextStyle(color: Colors.red)),
+              SizedBox(height: 10.0),
+              Container(
+                  width: 250.0,
+                  child: LinearProgressIndicator(value: progressPercent)),
+              SizedBox(height: 10.0),
+              Text('${(progressPercent * 100).toStringAsFixed(2)}%',
+                  style: TextStyle(color: Colors.red)),
+            ],
           );
         },
       );
