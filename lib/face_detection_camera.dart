@@ -190,7 +190,6 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
-        //constraints: BoxConstraints.expand(),
         child: _controller == null || isCapturing
             ? Center(
                 child: SpinKitCircle(
@@ -215,17 +214,14 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                       children: <Widget>[
                         Container(
                           decoration: BoxDecoration(
-                              color: Colors.black,
+                              color: Color(0xff430e80),
                               backgroundBlendMode: BlendMode.dstOut), // This one will handle background + difference out
                         ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Container(
-                            height: screenSize.width - (screenSize.width / 2.4),//screenSize.height - (screenSize.height / 1.5),
-                            width: screenSize.width - (screenSize.width / 2.4),
-                            decoration: BoxDecoration(color: Colors.red,
-                              borderRadius: BorderRadius.circular(150),
-                            ),
+                        Container(
+                          height: screenSize.width - (screenSize.width / 2.4),//screenSize.height - (screenSize.height / 1.5),
+                          width: screenSize.width - (screenSize.width / 2.4),
+                          decoration: BoxDecoration(color: Colors.red,
+                            borderRadius: BorderRadius.circular(150),
                           ),
                         ),
                       ],
@@ -256,13 +252,14 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                       ),
                     ),
                   ),
+
                   !foundFace
                       ? Positioned(
                     top: screenSize.height - (screenSize.width / 2),
                     child: Center(
                       child: Text(text,
                           style: TextStyle(
-                              color:Color(0xff430e80),
+                              color: Color(0xff430e80),
                               fontSize: 22.0,
                               letterSpacing: 2.0))),
                   )
