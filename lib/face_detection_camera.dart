@@ -35,7 +35,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   void showSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(value)));
+    _scaffoldKey.currentState.showSnackBar(SnackBar(duration: Duration(milliseconds : 3000), behavior: SnackBarBehavior.floating,content: Text(value)));
   }
 
   @override
@@ -68,7 +68,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       if (_isDetecting) return;
       _isDetecting = true;
 
-      detect(image, FirebaseVision.instance.faceDetector(FaceDetectorOptions(enableClassification: true)).processImage, rotation).then((dynamic result) {
+      detect(image, FirebaseVision.instance.faceDetector(FaceDetectorOptions(enableClassification: true, enableTracking: true)).processImage, rotation).then((dynamic result) {
           setState(() => faces = result);
           _isDetecting = false;
         },
@@ -88,6 +88,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       await _controller.initialize();
       setState(() => isCapturing = true );
       await Future.delayed(Duration(milliseconds: 50));
+      setState(() => isCapturing = true );
       await _controller.takePicture(path);
       Navigator.pop(context, path);
     } catch (e) {
@@ -101,8 +102,9 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       if (faces.length > 0) {
         for (Face face in faces) {
 
-          if (face.boundingBox.width < (screenSize.width - (screenSize.width / 4.25))) {
+          if (face.boundingBox.width < (screenSize.width - (screenSize.width / 6))) {
             text = 'Please align your face';
+            foundFace = false;
           }
           else {
             foundFace = true;
@@ -122,7 +124,13 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
             }
 
             if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
-              print('Face Id: ' + faceId.toString());
+              print('Face Id: ' + face.trackingId.toString());
+              print('Face Left: ' + face.boundingBox.left.toString());
+              print('Face Right: ' + face.boundingBox.right.toString());
+              print('Face Top: ' + face.boundingBox.top.toString());
+              print('Face Bottom: ' + face.boundingBox.bottom.toString());
+              print('Face Width: ' + face.boundingBox.width.toString());
+              print('Face height: ' + face.boundingBox.height.toString());
               captureImage();
             }
           }
@@ -134,6 +142,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     screenSize = MediaQuery.of(context).size;

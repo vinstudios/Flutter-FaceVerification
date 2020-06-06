@@ -5,6 +5,11 @@ import 'package:path/path.dart';
 import 'face_detection_camera.dart';
 import 'package:flutter/material.dart';
 
+final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+void showSnackBar(String value) {
+  _scaffoldKey.currentState.showSnackBar(SnackBar(duration: Duration(milliseconds : 3000),behavior: SnackBarBehavior.floating, content: Text(value)));
+}
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -14,10 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String image;
   String text = 'Please verify your face';
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  void showSnackBar(String value) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(value)));
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +116,16 @@ class _UploaderState extends State<Uploader> {
 
   void _startUpload() {
     setState(() {
-      _uploadTask = _storage
-          .ref()
-          .child('Faces/${basename(widget.path)}')
-          .putFile(File(widget.path));
+      try {
+        _uploadTask = _storage
+            .ref()
+            .child('Faces/${basename(widget.path)}')
+            .putFile(File(widget.path));
+      }
+      catch (e) {
+        showSnackBar(e.toString());
+        print('Upload error: ' + e.toString());
+      }
     });
   }
 
