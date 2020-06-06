@@ -7,6 +7,7 @@ import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'utils.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class FaceDetectionFromLiveCamera extends StatefulWidget {
   @override
@@ -25,9 +26,11 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   double leftEyeOpenProbability = 0;
   double rightEyeOpenProbability = 0;
   double closeEyeValue = 0.05;
+  int faceId;
 
+  bool isCapturing = false;
   bool _isDetecting = false;
-  CameraLensDirection _direction = CameraLensDirection.front;
+  CameraLensDirection _direction = CameraLensDirection.back;
 
   Size screenSize;
 
@@ -39,7 +42,9 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
 
   @override
   void deactivate() {
-    _controller.dispose();
+    if (_controller != null) {
+      _controller.dispose();
+    }
     super.deactivate();
   }
 
@@ -76,6 +81,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     try {
       final path = PATH.join((await getTemporaryDirectory()).path,'${DateTime.now()}.png');
       await _controller.initialize();
+      setState(() => isCapturing = true );
       await Future.delayed(Duration(milliseconds: 50));
       await _controller.takePicture(path);
       Navigator.pop(context, path);
@@ -84,67 +90,17 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     }
   }
 
-//  Widget _buildResults() {
-//    const Text noResultsText = const Text('No results!');
-//    if (faces == null || _controller == null || !_controller.value.isInitialized) {
-//      return noResultsText;
-//    }
-//
-//    CustomPainter painter;
-//
-//    final Size imageSize = Size(_controller.value.previewSize.height, _controller.value.previewSize.width);
-//
-//    if (faces is! List<Face>) return noResultsText;
-//
-//    painter = FacePainterLiveCamera(imageSize, faces);
-//
-//    if (faces.length > 0) {
-//      for (Face face in faces) {
-//        if (face.boundingBox.width < (screenSize.width - (screenSize.width / 5))) {
-//          text = 'Please align your face';
-//        }
-//        else {
-//          foundFace = true;
-//          if (face.leftEyeOpenProbability != null) {
-//            leftEyeOpenProbability =
-//                (face.leftEyeOpenProbability * fac).round() / fac;
-//          } else {
-//            leftEyeOpenProbability = 0;
-//          }
-//
-//          if (face.rightEyeOpenProbability != null) {
-//            rightEyeOpenProbability =
-//                (face.rightEyeOpenProbability * fac).round() / fac;
-//          } else {
-//            rightEyeOpenProbability = 0;
-//          }
-//
-//          if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
-//            captureImage();
-//          }
-//        }
-//
-//      }
-//    }
-//    else {
-//      foundFace = false;
-//      text = 'Searching face...';
-//    }
-//
-//    return CustomPaint(
-//      painter: painter,
-//    );
-//  }
-
   void faceVerification() {
     if (faces != null) {
       if (faces.length > 0) {
         for (Face face in faces) {
-          if (face.boundingBox.width < (screenSize.width - (screenSize.width / 5))) {
+
+          if (face.boundingBox.width < (screenSize.width - (screenSize.width / 4.25))) {
             text = 'Please align your face';
           }
           else {
             foundFace = true;
+            faceId = face.trackingId;
             if (face.leftEyeOpenProbability != null) {
               leftEyeOpenProbability =
                   (face.leftEyeOpenProbability * fac).round() / fac;
@@ -160,6 +116,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
             }
 
             if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
+              print('Face Id: ' + faceId.toString());
               captureImage();
             }
           }
@@ -178,28 +135,30 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     faceVerification();
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 5.0,
         elevation: 0.0,
-        leading: Image.asset(
-          'images/jex.png',
-          scale: 35.0,
+        title:Row(
+          children: <Widget>[
+            Text('JEX', style: TextStyle(
+                fontSize: 20.0,
+                letterSpacing: 2.0,
+                fontFamily: 'LemonMilkBold'
+            )),
+            Text('MOVERS', style: TextStyle(
+                fontSize: 20.0,
+                letterSpacing: 2.0,
+                fontFamily: 'LemonMilk'
+            )),
+          ],
         ),
-        title: Text('JEXMOVERS', style: TextStyle(
-          fontSize: 20.0,
-          letterSpacing: 2.0,
-        )),
-        backgroundColor: Color(0xFF1a237e),
+        backgroundColor: Color(0xffff8888),
       ),
       body: Container(
         //constraints: const BoxConstraints.expand(),
-        child: _controller == null
-            ? const Center(
-                child: Text(
-                  'Initializing Camera...',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 20.0,
-                  ),
+        child: _controller == null || isCapturing
+            ? Center(
+                child: SpinKitCircle(
+                  color: Color(0xffff8888),
+                  size: 80.0,
                 ),
               )
             : Stack(
@@ -207,9 +166,8 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                 fit: StackFit.expand,
                 children: <Widget>[
                   CameraPreview(_controller),
-                  //_buildResults(),
                   ColorFiltered(
-                    colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.srcOut), // This one will create the magic
+                    colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.35), BlendMode.srcOut), // This one will create the magic
                     child: Stack(
                       fit: StackFit.expand,
                       alignment: Alignment.center,
@@ -222,20 +180,20 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                         Align(
                           alignment: Alignment.center,
                           child: Container(
-                            margin: EdgeInsets.only(bottom: 20.0),
-                            height: screenSize.height - (screenSize.height / 4),
+                            // margin: EdgeInsets.only(bottom: 30.0),
+                            height: screenSize.height - (screenSize.height / 2),
                             width: screenSize.width - (screenSize.width / 5),
                             decoration: BoxDecoration(color: Colors.red,
-                              borderRadius: BorderRadius.circular(25),
+                              borderRadius: BorderRadius.circular(250),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  !foundFace
+                  foundFace
                       ? Positioned(
-                    top: screenSize.height - (screenSize.width / 5),
+                    top: screenSize.height - (screenSize.width / 2),
                     child: Text(text,
                         style: TextStyle(
                             color: Colors.white,
@@ -246,7 +204,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                           alignment: Alignment.center,
                           children: <Widget>[
                             Positioned(
-                              top: screenSize.height - (screenSize.width / 5),
+                              top: screenSize.height - (screenSize.width / 2),
                               child: Column(
                                 children: <Widget>[
                                   Text(
@@ -258,7 +216,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                                   Row(
                                     children: <Widget>[
                                       Text(
-                                          'Left eye lid: ${leftEyeOpenProbability * 100}%',
+                                          'Left eye lid: ${(leftEyeOpenProbability * 100).toStringAsFixed(2)}%',
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 14.0,
@@ -270,7 +228,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                                           letterSpacing: 1.0)),
                                       SizedBox(width: 10.0),
                                       Text(
-                                        'Right eye lid: ${rightEyeOpenProbability * 100}%',
+                                        'Right eye lid: ${(rightEyeOpenProbability * 100).toStringAsFixed(2)}%',
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 14.0,
@@ -285,6 +243,21 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                         ),
                 ],
               ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          height: 50.0,
+          child: Center(
+            child: Text('Face Verification', textAlign: TextAlign.center, style: TextStyle(
+                fontSize: 20.0,
+                letterSpacing: 2.0,
+                fontFamily: 'LemonMilk',
+                color: Colors.white,
+            )),
+          ),
+        ),
+        shape: CircularNotchedRectangle(),
+        color: Color(0xffff8888),
       ),
     );
   }

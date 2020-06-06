@@ -34,6 +34,7 @@ dependencies:
   firebase_storage: ^3.1.6
   path_provider: ^1.6.10
   path:
+  flutter_spinkit: "^4.1.2"
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +67,17 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
+  fonts:
+    - family: LemonMilk
+      fonts:
+        - asset: fonts/LEMONMILK-Regular.otf
+          weight: 400
+
+    - family: LemonMilkBold
+      fonts:
+        - asset: fonts/LEMONMILK-Bold.otf
+          weight: 700
+
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

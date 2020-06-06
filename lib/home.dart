@@ -13,8 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String image;
-  String text = 'Face verification';
-
+  String text = 'Please verify your face';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,11 +24,21 @@ class _HomeScreenState extends State<HomeScreen> {
           'images/jex.png',
           scale: 35.0,
         ),
-        title: Text('JEXMOVERS', style: TextStyle(
-          fontSize: 20.0,
-          letterSpacing: 2.0,
-        )),
-        backgroundColor: Color(0xFF1a237e),
+        title: Row(
+          children: <Widget>[
+            Text('JEX', style: TextStyle(
+              fontSize: 20.0,
+              letterSpacing: 2.0,
+              fontFamily: 'LemonMilkBold'
+            )),
+            Text('MOVERS', style: TextStyle(
+                fontSize: 20.0,
+                letterSpacing: 2.0,
+                fontFamily: 'LemonMilk'
+            )),
+          ],
+        ),
+        backgroundColor: Color(0xffff8888),
       ),
       body: SafeArea(
         child: Center(
@@ -38,7 +47,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: <Widget>[
                   Image.asset('images/face_detect.gif'),
                   SizedBox(height: 30.0),
-                  Text(text, style: TextStyle(color: Color(0xFF1a237e), fontSize: 20.0, letterSpacing: 1.5)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(color: Color(0xff6576e7), fontSize: 20.0, letterSpacing: 1.5,),
+                        text: text,
+                      ),
+                    ),
+                  ),
+                  //Text(text, style: TextStyle(color: Color(0xFF1a237e), fontSize: 20.0, letterSpacing: 1.5)),
                 ],
               )
               : Stack(alignment: Alignment.center,
@@ -49,10 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF1a237e),
-        child: Icon(Icons.camera, color: Colors.white, size: 45.0),
+        elevation: 5.0,
+        backgroundColor: Color(0xffff8888),
+        child: Icon(Icons.camera, color: Colors.white , size: 45.0),
         onPressed: () async {
           var result = await Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => FaceDetectionFromLiveCamera()));
@@ -64,6 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           });
         },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(height: 50.0),
+        shape: CircularNotchedRectangle(),
+        color: Color(0xffff8888),
       ),
     );
   }
