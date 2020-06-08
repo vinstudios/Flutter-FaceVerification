@@ -78,6 +78,26 @@ flutter:
         - asset: fonts/LEMONMILK-Bold.otf
           weight: 700
 
+    - family: IBMPlexMedium
+      fonts:
+        - asset: fonts/ibm/ibmplexsans_medium.ttf
+
+    - family: IBMPlexLight
+      fonts:
+        - asset: fonts/ibm/ibmplexsans_light.ttf
+
+    - family: IBMPlexSemiBold
+      fonts:
+        - asset: fonts/ibm/ibmplexsans_semibold.ttf
+
+    - family: GilroyBold
+      fonts:
+        - asset: fonts/gilroy/gilroy_bold.otf
+
+    - family: GilroySemiBold
+      fonts:
+        - asset: fonts/gilroy/gilroy_semibold.otf
+
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

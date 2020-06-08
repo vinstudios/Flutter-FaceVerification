@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as PATH;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,6 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   double leftEyeOpenProbability = 0;
   double rightEyeOpenProbability = 0;
   double closeEyeValue = 0.05;
-  int faceId;
   double faceWidthSize = 0.0;
   Size screenSize;
   String imagePath;
@@ -91,7 +91,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       if (_controller.value.isInitialized) {
         if (!_controller.value.isTakingPicture) {
           setState(() => isCapturing = true );
-          await Future.delayed(Duration(milliseconds: 50));
+          //await Future.delayed(Duration(milliseconds: 50));
           await _controller.takePicture(imagePath);
           setState(() => isCapturing = false );
           Navigator.pop(context, imagePath);
@@ -110,83 +110,101 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   }
 
   void faceVerification() {
-    if (faces != null && !isCapturing) {
-      if (faces.length > 0) {
-        for (Face face in faces) {
-          if (face.boundingBox.width < screenSize.width - (screenSize.width / 2.4)) {
-            text = 'Please come closer';
-            foundFace = false;
-            faceId = null;
-          }
-          else {
-            foundFace = true;
-            faceId = face.trackingId;
-            if (face.leftEyeOpenProbability != null) {
-              leftEyeOpenProbability =
-                  (face.leftEyeOpenProbability * fac).round() / fac;
-            } else {
-              leftEyeOpenProbability = 0;
-            }
+    if (faces == null || isCapturing) {return;}
 
-            if (face.rightEyeOpenProbability != null) {
-              rightEyeOpenProbability =
-                  (face.rightEyeOpenProbability * fac).round() / fac;
-            } else {
-              rightEyeOpenProbability = 0;
-            }
-
-            if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
-//              print('Face Id: ' + face.trackingId.toString());
-//              print('Face Left: ' + face.boundingBox.left.toString());
-//              print('Face Right: ' + face.boundingBox.right.toString());
-//              print('Face Top: ' + face.boundingBox.top.toString());
-//              print('Face Bottom: ' + face.boundingBox.bottom.toString());
-//              print('Face Width: ' + face.boundingBox.width.toString());
-//              print('Face height: ' + face.boundingBox.height.toString());
-
-              captureImage();
-            }
-          }
-        }
-      }
-      else {
-        foundFace = false;
-        faceId = null;
-        text = 'Searching face...';
-      }
+    if (faces.length < 1 ) {
+      foundFace = false;
+      text = 'Searching face...';
+      return;
     }
+
+    if (faces.length > 1) {
+      text = 'Only 1 face is allowed';
+      foundFace = false;
+      return;
+    }
+
+    if (faces[0].boundingBox.width < _controller.value.previewSize.width / 2.5) {
+      text = 'Please come closer';
+      foundFace = false;
+      return;
+    }
+
+    if (faces[0].boundingBox.width > _controller.value.previewSize.width / 1.65 ) {
+      text = 'Your too close';
+      foundFace = false;
+      return;
+    }
+
+    text = 'Now blink your eyes';
+    foundFace = true;
+    if (faces[0].leftEyeOpenProbability != null) {
+      leftEyeOpenProbability = (faces[0].leftEyeOpenProbability * fac).round() / fac;
+    } else {
+      leftEyeOpenProbability = 0;
+    }
+
+    if (faces[0].rightEyeOpenProbability != null) {
+      rightEyeOpenProbability = (faces[0].rightEyeOpenProbability * fac).round() / fac;
+    } else {
+      rightEyeOpenProbability = 0;
+    }
+
+
+    if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
+
+      print('########################## CAMERA SETTINGS ##########################');
+      print('Camera Height: ' + _controller.value.previewSize.height.toString());
+      print('Camera Width: ' + _controller.value.previewSize.width.toString());
+      print('Camera Aspect Ratio: ' + _controller.value.previewSize.aspectRatio.toString());
+
+      print('########################## FACE SETTINGS   ##########################');
+      print('Face Left: ' + faces[0].boundingBox.left.toString());
+      print('Face Right: ' + faces[0].boundingBox.right.toString());
+      print('Face Top: ' + faces[0].boundingBox.top.toString());
+      print('Face Bottom: ' + faces[0].boundingBox.bottom.toString());
+      print('Face Width: ' + faces[0].boundingBox.width.toString());
+      print('Face height: ' + faces[0].boundingBox.height.toString());
+
+      captureImage();
+    }
+
+
+
+
   }
 
-  void _modalBottomSheetMenu(){
-    showModalBottomSheet(
-        context: context,
-        builder: (builder){
-          return Container(
-            height: 350.0,
-            color: Colors.transparent, //could change this to Color(0xFF737373),
-            //so you don't have to change MaterialApp canvasColor
-            child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10.0),
-                        topRight: Radius.circular(10.0))),
-                child: Center(
-                  child: Column(
-                    children: <Widget>[
-                      Text("This is a modal sheet"),
-                    ],
-                  ),
-                )),
-          );
-        }
-    );
-  }
+//  void _modalBottomSheetMenu(){
+//    showModalBottomSheet(
+//        context: context,
+//        builder: (builder){
+//          return Container(
+//            height: 350.0,
+//            color: Colors.transparent, //could change this to Color(0xFF737373),
+//            //so you don't have to change MaterialApp canvasColor
+//            child: Container(
+//                decoration: BoxDecoration(
+//                    color: Colors.white,
+//                    borderRadius: BorderRadius.only(
+//                        topLeft: Radius.circular(10.0),
+//                        topRight: Radius.circular(10.0))),
+//                child: Center(
+//                  child: Column(
+//                    children: <Widget>[
+//                      Text("This is a modal sheet"),
+//                    ],
+//                  ),
+//                )),
+//          );
+//        }
+//    );
+//  }
 
   @override
   Widget build(BuildContext context) {
     screenSize = MediaQuery.of(context).size;
     faceVerification();
+
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
@@ -198,112 +216,209 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                 ),
               )
             : Stack(
-                //alignment: Alignment.center,
-                //fit: StackFit.expand,
                 children: <Widget>[
-                  Center(
-                    child: AspectRatio(
-                        aspectRatio: _controller.value.aspectRatio,
-                        child: CameraPreview(_controller)),
-                  ),
-                  ColorFiltered(
-                    colorFilter: ColorFilter.mode(Colors.white,/**Colors.white.withOpacity(0.35)*/ BlendMode.srcOut), // This one will create the magic
-                    child: Stack(
-                      //fit: StackFit.expand,
-                      alignment: Alignment.center,
-                      children: <Widget>[
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xff430e80),
-                              backgroundBlendMode: BlendMode.dstOut), // This one will handle background + difference out
-                        ),
-                        Container(
-                          height: screenSize.width - (screenSize.width / 2.4),//screenSize.height - (screenSize.height / 1.5),
-                          width: screenSize.width - (screenSize.width / 2.4),
-                          decoration: BoxDecoration(color: Colors.red,
-                            borderRadius: BorderRadius.circular(150),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   Container(
                     width: double.infinity,
-                    height: 90.0,
+                    height: screenSize.height /2,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(30.0),
-                          bottomRight: Radius.circular(30.0)),
+                          bottomLeft: Radius.circular(100),
+                          bottomRight: Radius.circular(100)),
                       gradient: LinearGradient(
-                        colors: [Color(0xff28045b), Color(0xff430e80)],
-                        stops: [0.0, 0.0],
+                        begin: Alignment.topCenter,
+                        colors: [Color(0xff280358), Color(0xff4F0C80)],
+                        stops: [0.0, 1.0],
                       ),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.only(top: 45.0),
-                      child: Text(
-                        'FACE VERIFICATION',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'LemonMilk',
-                            fontSize: 18.0,
-                            letterSpacing: 1.5),
+                      padding: EdgeInsets.only(top: 140.0),
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            'Face Verification',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'GilroySemiBold',
+                                fontSize: 22.0,
+                                letterSpacing: 1.5),
+                          ),
+                          SizedBox(height: 5.0),
+                          Text(
+                            'Identifying...',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'IBMPlexLight',
+                                fontSize: 18.0,
+                                letterSpacing: 3.0),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-
-                  !foundFace
-                      ? Positioned(
-                    top: screenSize.height - (screenSize.width / 2),
-                    child: Center(
-                      child: Text(text,
-                          style: TextStyle(
-                              color: Color(0xff430e80),
-                              fontSize: 22.0,
-                              letterSpacing: 2.0))),
-                  )
-                      : Stack(
-                          alignment: Alignment.center,
-                          children: <Widget>[
-                            Positioned(
-                              top: screenSize.height - (screenSize.width / 2),
-                              child: Column(
-                                children: <Widget>[
-                                  Text(
-                                      'Blink both eyes to take picture',
-                                      style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 20.0,
-                                          letterSpacing: 1.0)),
-                                  Row(
-                                    children: <Widget>[
-                                      Text(
-                                          'Left eye lid: ${(leftEyeOpenProbability * 100).toStringAsFixed(2)}%',
-                                          style: TextStyle(
-                                              color: Colors.red,
-                                              fontSize: 14.0,
-                                              letterSpacing: 1.0)),
-                                      SizedBox(width: 10.0),
-                                      Text(' | ', style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 14.0,
-                                          letterSpacing: 1.0)),
-                                      SizedBox(width: 10.0),
-                                      Text(
-                                        'Right eye lid: ${(rightEyeOpenProbability * 100).toStringAsFixed(2)}%',
-                                        style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 14.0,
-                                            letterSpacing: 1.0),
-                                      ),
-                                    ],
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white, width: 8.0),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.25),
+                            spreadRadius: 4,
+                            blurRadius: 7,
+                            offset: Offset(0, 3), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: screenSize.width / 2.7,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(screenSize.width),
+                          child: Container(
+                            height: screenSize.width,
+                            width: screenSize.width,
+                            child: ClipRRect(
+                              child: OverflowBox(
+                                alignment: Alignment.center,
+                                child: FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child:  Container(
+                                    width: screenSize.width,
+                                    height: screenSize.width / _controller.value.aspectRatio,
+                                    child: CameraPreview(_controller),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
-                          ],
+                          ),
                         ),
+                      ),
+                    ),
+                  ),
+//                  Center(
+//                    child: CircleAvatar(
+//                      radius: screenSize.width / 2.8,
+//                      child: ClipRRect(
+//                        borderRadius: BorderRadius.circular(screenSize.width),
+//                        child: Container(
+//                          height: screenSize.width,
+//                          width: screenSize.width,
+//                          child: ClipRRect(
+//                            child: OverflowBox(
+//                              alignment: Alignment.center,
+//                              child: FittedBox(
+//                                fit: BoxFit.fitWidth,
+//                                child:  Container(
+//                                  width: screenSize.width,
+//                                  height: screenSize.width / _controller.value.aspectRatio,
+//                                  child: CameraPreview(_controller),
+//                                ),
+//                              ),
+//                            ),
+//                          ),
+//                          decoration: BoxDecoration(
+//                            //border: Border.all(color: Colors.white),
+//                            boxShadow: [
+//                              BoxShadow(
+//                                color: Colors.grey.withOpacity(0.5),
+//                                spreadRadius: 10,
+//                                blurRadius: 10,
+//                                offset: Offset(1, 0), // changes position of shadow
+//                              ),
+//                            ],),
+//                        ),
+//                      ),
+//                    ),
+//                  ),
+
+//                  Center(
+//                    child: Stack(
+//                      children: <Widget>[
+//                        Center(
+//                          child: AspectRatio(
+//                              aspectRatio: _controller.value.aspectRatio,
+//                              child: CameraPreview(_controller)),
+//                        ),
+//                        ColorFiltered(
+//                          colorFilter: ColorFilter.mode(Colors.white,/**Colors.white.withOpacity(0.35)*/ BlendMode.srcOut), // This one will create the magic
+//                          child: Stack(
+//                            //fit: StackFit.expand,
+//                            alignment: Alignment.center,
+//                            children: <Widget>[
+//                              Container(
+//                                decoration: BoxDecoration(
+//                                    color: Color(0xff430e80),
+//                                    backgroundBlendMode: BlendMode.dstOut), // This one will handle background + difference out
+//                              ),
+//                              Container(
+//                                height: screenSize.width - (screenSize.width / 4),//screenSize.height - (screenSize.height / 1.5),
+//                                width: screenSize.width - (screenSize.width / 4),
+//                                decoration: BoxDecoration(color: Colors.red,
+//                                  borderRadius: BorderRadius.circular(screenSize.width),
+//                                ),
+//                              ),
+//                            ],
+//                          ),
+//                        ),
+//
+//                      ],
+//                    ),
+//                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: ((screenSize.height / 2) + (screenSize.width / 2.7)) + 30),
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                                text: text,
+                                style: TextStyle(
+                                  fontFamily: 'GilroySemiBold',
+                                    color: foundFace ? Colors.green : Colors.red,
+                                    fontSize: 18.0,
+                                    letterSpacing: 2.0)),
+                          ),
+                          SizedBox(height: 20.0),
+                          Container(
+                            height: 120.0,
+                            width: screenSize.width - 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.25),
+                                  spreadRadius: 2,
+                                  blurRadius: 3,
+                                  offset: Offset(0, 3), // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 18.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text('◼  Position your face within the frame',
+                                        style: TextStyle(color: Colors.grey.shade700)),
+                                    SizedBox(height: 10.0),
+                                    Text('◼  Your face will be automatically scan',
+                                        style: TextStyle(color: Colors.grey.shade700)),
+                                    SizedBox(height: 10.0),
+                                    Text('◼  Blink your both eyes to take a selfie',
+                                        style: TextStyle(color: Colors.grey.shade700)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
       ),
