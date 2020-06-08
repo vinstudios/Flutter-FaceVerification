@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'face_detection_camera.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 void showSnackBar(String value) {
@@ -21,6 +22,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String image;
   String text = 'Please verify your face';
+
+
+  Timer timer;
+
+  void startTimer() {
+    const millis = Duration(milliseconds: 1);
+
+    timer = Timer.periodic(millis, (timer) {
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: EdgeInsets.only(top: 45.0),
                 child: Text(
-                  'Face Verification',
+                  'FACE AUTHENTICATION',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: Colors.white,
@@ -62,29 +74,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Get ready to take a photo of your self',
+                    'Getting ready!',
                     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 5.0),
                   Text(
-                    'To verify your identity, we need to collect your bio information',
+                    'To complete your account, we will be collecting and verifying your personal information.',
                     style: TextStyle(fontSize: 14.0, color: Colors.grey.shade500),
                   ),
                   SizedBox(height: 20.0),
-                  Image.asset('images/face_detect.gif'),
+                  Image.asset('images/face_verification.jpg'),
                   SizedBox(height: 40.0),
+                  Text('To take a photo of yourself follow these steps:', style: TextStyle(fontSize: 14.0)),
                   Padding(
-                    padding: EdgeInsets.only(left: 40.0),
+                    padding: EdgeInsets.only(left: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text('◼  Position your face within the frame',
+                        SizedBox(height: 10.0),
+                        Text('◼  Position your face within the circle',
                             style: TextStyle(color: Colors.grey.shade700)),
                         SizedBox(height: 10.0),
-                        Text('◼  Your face will be automatically scan',
+                        Text('◼  Standby for scanning',
                             style: TextStyle(color: Colors.grey.shade700)),
                         SizedBox(height: 10.0),
-                        Text('◼  Blink your both eyes to take a selfie',
+                        Text('◼  Take a selfie by blinking your both eyes',
                             style: TextStyle(color: Colors.grey.shade700)),
                       ],
                     ),

@@ -33,11 +33,11 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   bool _isDetecting = false;
   CameraLensDirection _direction = CameraLensDirection.front;
 
-
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   void showSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(duration: Duration(milliseconds : 3000), behavior: SnackBarBehavior.floating,content: Text(value)));
   }
+
 
   @override
   void initState() {
@@ -91,7 +91,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       if (_controller.value.isInitialized) {
         if (!_controller.value.isTakingPicture) {
           setState(() => isCapturing = true );
-          //await Future.delayed(Duration(milliseconds: 50));
+          await Future.delayed(Duration(milliseconds: 50));
           await _controller.takePicture(imagePath);
           setState(() => isCapturing = false );
           Navigator.pop(context, imagePath);
@@ -114,7 +114,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
 
     if (faces.length < 1 ) {
       foundFace = false;
-      text = 'Searching face...';
+      text = 'Recognizing face...';
       return;
     }
 
@@ -125,18 +125,18 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     }
 
     if (faces[0].boundingBox.width < _controller.value.previewSize.width / 2.5) {
-      text = 'Please come closer';
+      text = 'Come closer';
       foundFace = false;
       return;
     }
 
     if (faces[0].boundingBox.width > _controller.value.previewSize.width / 1.65 ) {
-      text = 'Your too close';
+      text = 'You\'re very close';
       foundFace = false;
       return;
     }
 
-    text = 'Now blink your eyes';
+    text = 'Blink your eyes to take your selfie';
     foundFace = true;
     if (faces[0].leftEyeOpenProbability != null) {
       leftEyeOpenProbability = (faces[0].leftEyeOpenProbability * fac).round() / fac;
@@ -149,7 +149,6 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
     } else {
       rightEyeOpenProbability = 0;
     }
-
 
     if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
 
@@ -231,21 +230,23 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                       ),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.only(top: 140.0),
+                      padding: EdgeInsets.only(top: 100.0),
                       child: Column(
                         children: <Widget>[
+                          Icon(Icons.face, color: Colors.white, size: 35.0),
+                          SizedBox(height: 5.0),
                           Text(
-                            'Face Verification',
+                            'Face Authentication',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'GilroySemiBold',
                                 fontSize: 22.0,
-                                letterSpacing: 1.5),
+                                letterSpacing: 1.0),
                           ),
                           SizedBox(height: 5.0),
                           Text(
-                            'Identifying...',
+                            'Verifying...',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
@@ -402,13 +403,13 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Text('◼  Position your face within the frame',
+                                    Text('✔  Position your face within the circle',
                                         style: TextStyle(color: Colors.grey.shade700)),
                                     SizedBox(height: 10.0),
-                                    Text('◼  Your face will be automatically scan',
+                                    Text('✔  Standby for scanning',
                                         style: TextStyle(color: Colors.grey.shade700)),
                                     SizedBox(height: 10.0),
-                                    Text('◼  Blink your both eyes to take a selfie',
+                                    Text('✔  Take a selfie by blinking your both eyes',
                                         style: TextStyle(color: Colors.grey.shade700)),
                                   ],
                                 ),
