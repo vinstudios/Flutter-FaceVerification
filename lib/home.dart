@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 40.0),
+            SizedBox(height: 20.0),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 30.0),
               child: image == null ? Column(
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 20.0),
                   Image.asset('images/face_verification.jpg'),
-                  SizedBox(height: 40.0),
+                  SizedBox(height: 20.0),
                   Text('To take a photo of yourself follow these steps:', style: TextStyle(fontSize: 14.0)),
                   Padding(
                     padding: EdgeInsets.only(left: 20.0),
@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     ),
             ),
-            SizedBox(height: 40.0),
+            SizedBox(height: 30.0),
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
