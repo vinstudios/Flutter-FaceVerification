@@ -381,9 +381,9 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                                     fontSize: 18.0,
                                     letterSpacing: 2.0)),
                           ),
-                          SizedBox(height: 20.0),
+                          SizedBox(height: 15.0),
                           Container(
-                            height: 120.0,
+                            height: 140.0,
                             width: screenSize.width - 50,
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -410,6 +410,9 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                                         style: TextStyle(color: Colors.grey.shade700)),
                                     SizedBox(height: 10.0),
                                     Text('✔  Take a selfie by blinking your both eyes',
+                                        style: TextStyle(color: Colors.grey.shade700)),
+                                    SizedBox(height: 10.0),
+                                    Text('✔  Please remove your eyeglasses',
                                         style: TextStyle(color: Colors.grey.shade700)),
                                   ],
                                 ),

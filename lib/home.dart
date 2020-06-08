@@ -27,12 +27,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer timer;
 
   void startTimer() {
-    const millis = Duration(milliseconds: 1);
+    const millis = Duration(seconds: 1);
 
-    timer = Timer.periodic(millis, (timer) {
-
+    timer = Timer.periodic(millis, (Timer timer) {
+      print('Timer is starting...');
     });
   }
+
+//  @override
+//  void initState() {
+//    // TODO: implement initState
+//    super.initState();
+//    //print('start time');
+//    //startTimer();
+//
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(color: Colors.grey.shade700)),
                         SizedBox(height: 10.0),
                         Text('◼  Take a selfie by blinking your both eyes',
+                            style: TextStyle(color: Colors.grey.shade700)),
+                        SizedBox(height: 10.0),
+                        Text('◼  Please remove your eyeglasses',
                             style: TextStyle(color: Colors.grey.shade700)),
                       ],
                     ),
