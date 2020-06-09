@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as PATH;
 import 'package:path_provider/path_provider.dart';
@@ -6,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
-import 'image_data.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'image_data.dart';
+
 
 class FaceDetectionFromLiveCamera extends StatefulWidget {
   @override
@@ -31,13 +33,27 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   bool customSize;
   bool isCapturing = false;
   bool _isDetecting = false;
+  bool closeEyes = false;
   CameraLensDirection _direction = CameraLensDirection.front;
+  int elapsedMilliClosedEye = 0;
+  Timer timer;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   void showSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(duration: Duration(milliseconds : 3000), behavior: SnackBarBehavior.floating,content: Text(value)));
   }
 
+  void startTimer() {
+    //int elapsedMilli = 0;
+    timer = Timer.periodic(Duration(milliseconds: 1), (timer) {
+      elapsedMilliClosedEye = timer.tick;
+//      int currentMilli = timer.tick;
+//      if (currentMilli - elapsedMilli >= milliInterval) {
+//        elapsedMilli = currentMilli;
+//        print('$milliInterval milliseconds had passed');
+//      }
+    });
+  }
 
   @override
   void initState() {
@@ -110,34 +126,63 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
   }
 
   void faceVerification() {
-    if (faces == null || isCapturing) {return;}
+    if (faces == null || isCapturing) {
+      if (timer != null) {
+        timer.cancel();
+      }
+      elapsedMilliClosedEye = 0;
+      closeEyes = false;
+      foundFace = false;
+      return;
+    }
 
     if (faces.length < 1 ) {
+      if (timer != null) {
+        timer.cancel();
+      }
+      elapsedMilliClosedEye = 0;
+      closeEyes = false;
       foundFace = false;
       text = 'Recognizing face...';
       return;
     }
 
     if (faces.length > 1) {
+      if (timer != null) {
+        timer.cancel();
+      }
+      elapsedMilliClosedEye = 0;
       text = 'Only 1 face is allowed';
+      closeEyes = false;
       foundFace = false;
       return;
     }
 
     if (faces[0].boundingBox.width < _controller.value.previewSize.width / 2.5) {
+      if (timer != null) {
+        timer.cancel();
+      }
+      elapsedMilliClosedEye = 0;
       text = 'Come closer';
+      closeEyes = false;
       foundFace = false;
       return;
     }
 
     if (faces[0].boundingBox.width > _controller.value.previewSize.width / 1.65 ) {
+      if (timer != null) {
+        timer.cancel();
+      }
+      elapsedMilliClosedEye = 0;
       text = 'You\'re very close';
+      closeEyes = false;
       foundFace = false;
       return;
     }
 
     text = 'Blink your eyes to take your selfie';
     foundFace = true;
+
     if (faces[0].leftEyeOpenProbability != null) {
       leftEyeOpenProbability = (faces[0].leftEyeOpenProbability * fac).round() / fac;
     } else {
@@ -150,54 +195,23 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
       rightEyeOpenProbability = 0;
     }
 
-    if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
-
-      print('########################## CAMERA SETTINGS ##########################');
-      print('Camera Height: ' + _controller.value.previewSize.height.toString());
-      print('Camera Width: ' + _controller.value.previewSize.width.toString());
-      print('Camera Aspect Ratio: ' + _controller.value.previewSize.aspectRatio.toString());
-
-      print('########################## FACE SETTINGS   ##########################');
-      print('Face Left: ' + faces[0].boundingBox.left.toString());
-      print('Face Right: ' + faces[0].boundingBox.right.toString());
-      print('Face Top: ' + faces[0].boundingBox.top.toString());
-      print('Face Bottom: ' + faces[0].boundingBox.bottom.toString());
-      print('Face Width: ' + faces[0].boundingBox.width.toString());
-      print('Face height: ' + faces[0].boundingBox.height.toString());
-
+    if (closeEyes && elapsedMilliClosedEye >= 1000 && leftEyeOpenProbability > closeEyeValue && rightEyeOpenProbability > closeEyeValue) {
       captureImage();
     }
 
-
-
+    if (leftEyeOpenProbability <= closeEyeValue && rightEyeOpenProbability <= closeEyeValue) {
+      closeEyes = true;
+      startTimer();
+    }
+    else {
+      closeEyes = false;
+      if (timer != null) {
+        timer.cancel();
+      }
+      elapsedMilliClosedEye = 0;
+    }
 
   }
-
-//  void _modalBottomSheetMenu(){
-//    showModalBottomSheet(
-//        context: context,
-//        builder: (builder){
-//          return Container(
-//            height: 350.0,
-//            color: Colors.transparent, //could change this to Color(0xFF737373),
-//            //so you don't have to change MaterialApp canvasColor
-//            child: Container(
-//                decoration: BoxDecoration(
-//                    color: Colors.white,
-//                    borderRadius: BorderRadius.only(
-//                        topLeft: Radius.circular(10.0),
-//                        topRight: Radius.circular(10.0))),
-//                child: Center(
-//                  child: Column(
-//                    children: <Widget>[
-//                      Text("This is a modal sheet"),
-//                    ],
-//                  ),
-//                )),
-//          );
-//        }
-//    );
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -297,75 +311,6 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                       ),
                     ),
                   ),
-//                  Center(
-//                    child: CircleAvatar(
-//                      radius: screenSize.width / 2.8,
-//                      child: ClipRRect(
-//                        borderRadius: BorderRadius.circular(screenSize.width),
-//                        child: Container(
-//                          height: screenSize.width,
-//                          width: screenSize.width,
-//                          child: ClipRRect(
-//                            child: OverflowBox(
-//                              alignment: Alignment.center,
-//                              child: FittedBox(
-//                                fit: BoxFit.fitWidth,
-//                                child:  Container(
-//                                  width: screenSize.width,
-//                                  height: screenSize.width / _controller.value.aspectRatio,
-//                                  child: CameraPreview(_controller),
-//                                ),
-//                              ),
-//                            ),
-//                          ),
-//                          decoration: BoxDecoration(
-//                            //border: Border.all(color: Colors.white),
-//                            boxShadow: [
-//                              BoxShadow(
-//                                color: Colors.grey.withOpacity(0.5),
-//                                spreadRadius: 10,
-//                                blurRadius: 10,
-//                                offset: Offset(1, 0), // changes position of shadow
-//                              ),
-//                            ],),
-//                        ),
-//                      ),
-//                    ),
-//                  ),
-
-//                  Center(
-//                    child: Stack(
-//                      children: <Widget>[
-//                        Center(
-//                          child: AspectRatio(
-//                              aspectRatio: _controller.value.aspectRatio,
-//                              child: CameraPreview(_controller)),
-//                        ),
-//                        ColorFiltered(
-//                          colorFilter: ColorFilter.mode(Colors.white,/**Colors.white.withOpacity(0.35)*/ BlendMode.srcOut), // This one will create the magic
-//                          child: Stack(
-//                            //fit: StackFit.expand,
-//                            alignment: Alignment.center,
-//                            children: <Widget>[
-//                              Container(
-//                                decoration: BoxDecoration(
-//                                    color: Color(0xff430e80),
-//                                    backgroundBlendMode: BlendMode.dstOut), // This one will handle background + difference out
-//                              ),
-//                              Container(
-//                                height: screenSize.width - (screenSize.width / 4),//screenSize.height - (screenSize.height / 1.5),
-//                                width: screenSize.width - (screenSize.width / 4),
-//                                decoration: BoxDecoration(color: Colors.red,
-//                                  borderRadius: BorderRadius.circular(screenSize.width),
-//                                ),
-//                              ),
-//                            ],
-//                          ),
-//                        ),
-//
-//                      ],
-//                    ),
-//                  ),
                   Padding(
                     padding: EdgeInsets.only(top: ((screenSize.height / 2) + (screenSize.width / 2.7)) + 30),
                     child: Center(
@@ -399,10 +344,13 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                             ),
                             child: Center(
                               child: Padding(
-                                padding: EdgeInsets.only(top: 18.0),
+                                padding: EdgeInsets.only(top: 15.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
+                                    Text('✔  Please remove your eyeglasses',
+                                        style: TextStyle(color: Colors.grey.shade700)),
+                                    SizedBox(height: 10.0),
                                     Text('✔  Position your face within the circle',
                                         style: TextStyle(color: Colors.grey.shade700)),
                                     SizedBox(height: 10.0),
@@ -411,9 +359,7 @@ class _FaceDetectionFromLiveCameraState extends State<FaceDetectionFromLiveCamer
                                     SizedBox(height: 10.0),
                                     Text('✔  Take a selfie by blinking your both eyes',
                                         style: TextStyle(color: Colors.grey.shade700)),
-                                    SizedBox(height: 10.0),
-                                    Text('✔  Please remove your eyeglasses',
-                                        style: TextStyle(color: Colors.grey.shade700)),
+
                                   ],
                                 ),
                               ),

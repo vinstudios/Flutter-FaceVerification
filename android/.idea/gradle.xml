@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="PLATFORM" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="1.8" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/camera-0.5.8+2/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_core-0.4.5/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_core_web-0.1.1+2/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_ml_vision-0.9.4/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_storage-3.1.6/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-1.6.10/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-0.0.1+1/android" />
+            <option value="C:/dev/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_macos-0.0.4+3/android" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

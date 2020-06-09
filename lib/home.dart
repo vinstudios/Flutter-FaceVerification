@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'face_detection_camera.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
+
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 void showSnackBar(String value) {
@@ -22,26 +22,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String image;
   String text = 'Please verify your face';
-
-
-  Timer timer;
-
-  void startTimer() {
-    const millis = Duration(seconds: 1);
-
-    timer = Timer.periodic(millis, (Timer timer) {
-      print('Timer is starting...');
-    });
-  }
-
-//  @override
-//  void initState() {
-//    // TODO: implement initState
-//    super.initState();
-//    //print('start time');
-//    //startTimer();
-//
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         SizedBox(height: 10.0),
+                        Text('◼  Please remove your eyeglasses',
+                            style: TextStyle(color: Colors.grey.shade700)),
+                        SizedBox(height: 10.0),
                         Text('◼  Position your face within the circle',
                             style: TextStyle(color: Colors.grey.shade700)),
                         SizedBox(height: 10.0),
@@ -108,9 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(color: Colors.grey.shade700)),
                         SizedBox(height: 10.0),
                         Text('◼  Take a selfie by blinking your both eyes',
-                            style: TextStyle(color: Colors.grey.shade700)),
-                        SizedBox(height: 10.0),
-                        Text('◼  Please remove your eyeglasses',
                             style: TextStyle(color: Colors.grey.shade700)),
                       ],
                     ),
